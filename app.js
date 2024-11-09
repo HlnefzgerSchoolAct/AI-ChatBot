@@ -1,3 +1,7 @@
+document.getElementById("theme-switch").addEventListener("change", handleTrainingModeToggle);
+
+let isTrainingMode = document.getElementById("theme-switch").checked;
+
 document.getElementById("send-btn").addEventListener("click", handleSend);
 document.getElementById("teach-btn").addEventListener("click", handleTeach);
 document.getElementById("reset-memory-btn").addEventListener("click", handleResetMemory);
@@ -7,20 +11,29 @@ document.getElementById("user-input").addEventListener("keypress", (e) => {
     }
 });
 
-
 let memory = JSON.parse(localStorage.getItem("chatbotMemory")) || {};
-const grammarRules = [
+const grammarRules = [];
+const encodedPassword = "cmVzZXQxMjM=";
+let conversationHistory = []; 
+
+const stopWords = [
+    "the", "is", "at", "which", "on", "of", "and", "a", "an", "for", "in", "to", "by", 
+    "with", "as", "that", "it", "or", "be", "was", "were", "are", "this", "these", "those", 
+    "but", "from", "i", "you", "he", "she", "they", "we", "me", "him", "her", "them", "us", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "tis"
 ];
-
-const encodedPassword = "cmVzZXQxMjM="; 
-
+function removeStopWords(input) {
+    const words = input.split(" ");
+    const filteredWords = words.filter(word => !stopWords.includes(word.toLowerCase()));
+    return filteredWords.join(" ");
+}
 
 function decodePassword(encoded) {
     return atob(encoded); 
 }
 
 function cleanInput(input) {
-    return input.replace(/[.,?!]/g, "").toLowerCase();
+    const cleanedInput = removeStopWords(input);
+    return cleanedInput.replace(/[.,?!]/g, "").toLowerCase();
 }
 
 function levenshteinDistance(a, b) {
@@ -42,7 +55,6 @@ function levenshteinDistance(a, b) {
     return matrix[a.length][b.length];
 }
 
-
 function findClosestMatch(input, tolerance = 2) {
     const cleanedInput = cleanInput(input);
     for (const question in memory) {
@@ -54,11 +66,9 @@ function findClosestMatch(input, tolerance = 2) {
     return null;
 }
 
-
 function isMathExpression(input) {
     return /^[\d+\-*/().\s]+$/.test(input);
 }
-
 
 function evaluateMathExpression(expression) {
     try {
@@ -68,13 +78,15 @@ function evaluateMathExpression(expression) {
     }
 }
 
-
 function handleSend() {
     const userInput = document.getElementById("user-input").value.trim();
     if (!userInput) return;
 
     addMessage("user", userInput);
     document.getElementById("user-input").value = "";
+
+    
+    conversationHistory.push({ role: "user", message: userInput });
 
     setTimeout(() => {
         const response = generateResponse(userInput);
@@ -83,6 +95,11 @@ function handleSend() {
 }
 
 function handleTeach() {
+    if (!isTrainingMode) {
+        addMessage("ai", "Training mode is disabled. Please turn it on using the switch.");
+        return;
+    }
+
     const question = document.getElementById("teach-question").value.trim().toLowerCase();
     const answer = document.getElementById("teach-answer").value.trim();
 
@@ -126,7 +143,29 @@ function generateResponse(input) {
         return closeMatch;
     }
 
-    return `I'm not sure how to respond to that. You can teach me a response using the training feilds.`;
+  
+    const aiResponse = getAIResponse(input);
+    return aiResponse;
+}
+
+function getAIResponse(input) {
+   
+    const context = conversationHistory.slice(-3);
+    if (input.toLowerCase().includes("how are you")) {
+        return "I'm just a bot, but I'm doing great! How about you?";
+    }
+
+    if (input.toLowerCase().includes("help")) {
+        return "I can assist you with many things. Ask me anything!";
+    }
+
+    if (input.toLowerCase().includes("weather")) {
+        return "I can't check the weather, but you can use a weather app or website for that!";
+    }
+
+    const response = `I'm not sure how to respond to that, but here's something: I see you're interested in ${input}. Can you tell me more?`;
+
+    return response;
 }
 
 function handleResetMemory() {
@@ -139,5 +178,21 @@ function handleResetMemory() {
         addMessage("ai", "Memory has been reset.");
     } else {
         addMessage("ai", "Incorrect password. Memory not reset.");
+    }
+}
+
+function handleTrainingModeToggle() {
+    const enteredPassword = prompt("Please enter the secret password to toggle training mode:");
+
+    if (enteredPassword === decodePassword(encodedPassword)) {
+        isTrainingMode = document.getElementById("theme-switch").checked;
+        if (isTrainingMode) {
+            addMessage("ai", "Training mode enabled. You can now teach me.");
+        } else {
+            addMessage("ai", "Training mode disabled.");
+        }
+    } else {
+        document.getElementById("theme-switch").checked = !isTrainingMode;
+        addMessage("ai", "Incorrect password. Training mode not changed.");
     }
 }
