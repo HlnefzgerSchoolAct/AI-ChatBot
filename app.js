@@ -8,7 +8,7 @@ document.getElementById("user-input").addEventListener("keypress", (e) => {
 });
 
 
-let memory = JSON.parse(localStorage.getItem("chatbotMemory")) || {};
+let memory = JSON.parse(globalStorage.getItem("chatbotMemory")) || {};
 const grammarRules = [
 ];
 
@@ -89,7 +89,7 @@ function handleTeach() {
     if (question && answer) {
         memory[question] = answer;
 
-        localStorage.setItem("chatbotMemory", JSON.stringify(memory));
+        globalStorage.setItem("chatbotMemory", JSON.stringify(memory));
 
         addMessage("ai", `Got it! I'll respond to "${question}" with "${answer}".`);
 
@@ -134,7 +134,7 @@ function handleResetMemory() {
 
     if (enteredPassword === decodePassword(encodedPassword)) {
         memory = {};
-        localStorage.removeItem("chatbotMemory");
+        globalStorage.removeItem("chatbotMemory");
 
         addMessage("ai", "Memory has been reset.");
     } else {
