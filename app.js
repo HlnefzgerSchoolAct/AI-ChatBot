@@ -19,7 +19,9 @@ let conversationHistory = [];
 const stopWords = [
     "the", "is", "at", "which", "on", "of", "and", "a", "an", "for", "in", "to", "by", 
     "with", "as", "that", "it", "or", "be", "was", "were", "are", "this", "these", "those", 
-    "but", "from", "i", "you", "he", "she", "they", "we", "me", "him", "her", "them", "us", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "tis"
+    "but", "from", "i", "you", "he", "she", "they", "we", "me", "him", "her", "them", "us",
+    "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was",
+    "were", "be", "been", "it's", "does", "how", "many"
 ];
 function removeStopWords(input) {
     const words = input.split(" ");
