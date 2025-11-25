@@ -173,7 +173,7 @@ function getAIResponse(input) {
 function handleResetMemory() {
     const enteredPassword = prompt("Please enter the secret password to reset memory:");
 
-    if (enteredPassword === decodePassword(encodedPassword)) {
+    if (enteredPassword === 123)) {
         memory = {};
         localStorage.removeItem("chatbotMemory");
 
